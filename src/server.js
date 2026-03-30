@@ -1,18 +1,30 @@
 import express from 'express';
 import 'dotenv/config';
-import exemplosRoutes from './routes/exemploRoute.js';
+import imoveisRoutes from './routes/imoveisRoute.js';
+import clientesRoutes from './routes/clientesRoute.js';
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
+docApiSwagger(app)({
+    info: {
+        title: 'API de exemplo - Documentação Swagger',
+        version: '1.0.0',
+        description: 'Esta é a documentação da API de exemplo usando Swagger.',
+    },
+    baseDir: import.meta.dirname,
+    filesPattern: './**/*.js',
+});
+
 app.get('/', (req, res) => {
     res.send('🚀 API funcionando');
 });
 
 // Rotas
-app.use('/api', exemplosRoutes);
+app.use('/api', imoveisRoutes);
+app.use('/api', clientesRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });
