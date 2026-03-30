@@ -1,5 +1,7 @@
 import express from 'express';
 import * as controller from '../controllers/imoveisController.js';
+import { upload } from '../utils/uploadConfig.js';
+import * as FotoController from '../controllers/FotoController.js';
 
 const router = express.Router();
 
@@ -10,9 +12,6 @@ router.put('/imoveis/:id', controller.atualizar);
 router.delete('/imoveis/:id', controller.excluir);
 
 export default router;
-
-import { upload } from '../utils/uploadConfig.js';
-import * as FotoController from '../controllers/FotoController.js';
 
 //POST
 router.post('/catalogo/:id/foto', upload.single('foto'), FotoController.uploadFoto);
