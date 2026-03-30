@@ -6,11 +6,43 @@ datasource db {
     provider = "postgresql"
 }
 
-model Exemplo {
+model Cliente {
     id        Int      @id @default(autoincrement())
-    nome      String?
-    estado   Boolean  @default(true)
-    preco     Decimal  @db.Decimal(10, 2)
+    nome      String
+    email       String?   
+    cpf         String?   
+    telefone    String?   
+    cep         String?  @db.Char(9)
+    logradouro  String?
+    bairro      String?
+    localidade  String?
+    uf          String?
+    ativo       Boolean  @default(true)
 
-    @@map("exemplo")
+    //1:N
+    imoveis     Imoveis[]
+
+    @@map("cliente")
+}
+ 
+model Imoveis {
+    id        Int      @id @default(autoincrement())
+    nome      String
+    descricao      String?
+    categoria  TipoCategoria
+    preco       Decimal   @db.Decimal(10,2)
+    foto      String?
+    disponivel       Boolean  @default(true)
+
+    clienteId Int
+    cliente  Cliente @relation(fields: [clienteId], references: [id])
+
+    @@map("imoveis")
+}
+
+enum TipoCategoria {
+    APARTAMENTO
+    CASA
+    TERRENO
+    COMERCIAL
 }
