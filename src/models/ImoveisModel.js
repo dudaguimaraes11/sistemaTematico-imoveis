@@ -1,4 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import pkg from '@prisma/client';
+import ImoveisModel from '../controllers/imoveisController.js';
+const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
 
@@ -6,13 +8,13 @@ export async function buscarTodos(filtros = {}) {
     const where = {};
 
     if (filtros.nome) {
-        where.nome = { contains: filtros.nome, mode: "insensitive" };
+        where.nome = { contains: filtros.nome, mode: 'insensitive' };
     }
     if (filtros.categoria) {
         where.categoria = filtros.categoria;
     }
     if (filtros.disponivel !== undefined) {
-        where.disponivel = filtros.disponivel === "true";
+        where.disponivel = filtros.disponivel === 'true';
     }
 
     return prisma.imovel.findMany({
@@ -64,3 +66,5 @@ export async function excluir(id) {
         where: { id: Number(id) },
     });
 }
+
+export default ImoveisModel

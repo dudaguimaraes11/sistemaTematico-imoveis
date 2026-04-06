@@ -1,12 +1,10 @@
 import express from 'express';
 import multer from 'multer';
 import * as controller from '../controllers/imoveisController.js';
-import { uploadFoto, getFoto } from '../controllers/imovelController.js';
-import { upload } from '../utils/uploadConfig.js';
+import upload from '../utils/uploadConfig.js';
 import * as FotoController from '../controllers/FotoController.js';
 
 const router = express.Router();
-const upload = multer(); 
 
 router.post('/imoveis', controller.criar);
 router.get('/imoveis', controller.buscarTodos);

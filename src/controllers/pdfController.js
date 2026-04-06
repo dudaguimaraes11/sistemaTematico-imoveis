@@ -1,5 +1,5 @@
 import ImoveisModel from '../models/ImoveisModel.js';
-import { gerarPdfTodos, gerarPdfImoveis } from '../utils/pdfHelper.js';
+import { gerarPdfTodos, gerarPdfImovel } from '../utils/pdfHelper.js';
 
 export const imovelPorId = async (req, res) => {
     try {

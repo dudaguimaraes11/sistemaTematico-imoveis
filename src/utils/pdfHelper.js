@@ -23,15 +23,17 @@ export async function gerarPdfImovel(imovel) {
     return htmlPdf.generatePdf({ content: html }, { format: 'A4' });
 }
 
+// Todos
+
 export async function gerarPdfTodos(imoveis) {
     const linhas = imoveis
         .map(
             (a) => `
     <tr>
         <td>${a.nome}</td>
-        <td>${a.descricao} || '-'</td>
-        <td>${a.categoria} || '-'</td>
-        <td>${a.foto} || '-'</td>
+        <td>${a.descricao || '-'}</td>
+        <td>${a.categoria || '-'}</td>
+        <td>${a.foto || '-' }</td>
     </tr>`,
         )
         .join('');
