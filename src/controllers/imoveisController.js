@@ -1,4 +1,4 @@
-import * as ImoveisModel from '../models/ImoveisModel.js';
+import ImoveisModel from '../models/ImoveisModel.js';
 
 export async function criar(req, res) {
     try {
@@ -9,18 +9,16 @@ export async function criar(req, res) {
         const { nome, categoria, preco, disponivel } = req.body;
 
         if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório.' });
-        if (!categoria)
-            return res.status(400).json({ error: 'O campo "categoria" é obrigatório.' });
-        if (preco === undefined)
-            return res.status(400).json({ error: 'O campo "preço" é obrigatório.' });
-        if (disponivel === undefined)
-            return res.status(400).json({ error: 'O campo "disponível" é obrigatório.' });
+        if (!categoria) return res.status(400).json({ error: 'O campo "categoria" é obrigatório.' });
+        if (preco === undefined) return res.status(400).json({ error: 'O campo "preço" é obrigatório.' });
+        if (disponivel === undefined) return res.status(400).json({ error: 'O campo "disponível" é obrigatório.' });
 
-        const imovelCriado = await ImoveisModel.criar(req.body);
+        const imovel = new ImoveisModel(req.body);
+        const imovelCriado = await imovel.criar();
         return res.status(201).json(imovelCriado);
     } catch (error) {
         console.error('Erro ao criar imóvel:', error);
-        return res.status(500).json({ error: 'Erro interno ao criar o imóvel.' });
+        return res.status(500).json({ error: error.message || 'Erro interno ao criar o imóvel.' });
     }
 }
 
@@ -63,24 +61,24 @@ export async function atualizar(req, res) {
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
         }
+
         const imovelExistente = await ImoveisModel.buscarPorId(parseInt(id));
         if (!imovelExistente) {
             return res.status(404).json({ error: 'Imóvel não encontrado para atualizar.' });
         }
         if (imovelExistente.disponivel === false) {
-            return res
-                .status(400)
-                .json({ error: 'Imóvel indisponível. Não é possível atualizar.' });
+            return res.status(400).json({ error: 'Imóvel indisponível. Não é possível atualizar.' });
         }
         if (req.body.preco !== undefined && req.body.preco < 0) {
             return res.status(400).json({ error: 'O campo "preço" deve ser um valor positivo.' });
         }
 
-        const imovelAtualizado = await ImoveisModel.atualizar(parseInt(id), req.body);
-        return res.status(200).json(imovelAtualizado);
+        const imovelAtualizado = new ImoveisModel({ id: parseInt(id), ...req.body });
+        const resultado = await imovelAtualizado.atualizar();
+        return res.status(200).json(resultado);
     } catch (error) {
         console.error('Erro ao atualizar imóvel:', error);
-        return res.status(500).json({ error: 'Erro interno ao atualizar o imóvel.' });
+        return res.status(500).json({ error: error.message || 'Erro interno ao atualizar o imóvel.' });
     }
 }
 
@@ -90,21 +88,19 @@ export async function excluir(req, res) {
         if (isNaN(id)) {
             return res.status(400).json({ error: 'ID inválido.' });
         }
+
         const imovelExistente = await ImoveisModel.buscarPorId(parseInt(id));
         if (!imovelExistente) {
             return res.status(404).json({ error: 'Imóvel não encontrado para exclusão.' });
         }
-
         if (imovelExistente.disponivel === false) {
             return res.status(400).json({ error: 'Imóvel indisponível. Não é possível excluir.' });
         }
 
-        await ImoveisModel.excluir(parseInt(id));
+        await imovelExistente.deletar();
         return res.status(204).send();
     } catch (error) {
         console.error('Erro ao excluir imóvel:', error);
         return res.status(500).json({ error: 'Erro interno ao excluir o imóvel.' });
     }
 }
-
-export default ImoveisModel;

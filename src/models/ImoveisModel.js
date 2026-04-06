@@ -1,70 +1,96 @@
-import pkg from '@prisma/client';
-import ImoveisModel from '../controllers/imoveisController.js';
-const { PrismaClient } = pkg;
+import prisma from '../utils/prismaClient.js';
 
-const prisma = new PrismaClient();
-
-export async function buscarTodos(filtros = {}) {
-    const where = {};
-
-    if (filtros.nome) {
-        where.nome = { contains: filtros.nome, mode: 'insensitive' };
+export default class ImoveisModel {
+    constructor({
+        id,
+        nome,
+        descricao = null,
+        categoria,
+        disponivel = true,
+        preco,
+        foto = null,
+        proprietarioId,
+    } = {}) {
+        this.id = id;
+        this.nome = nome;
+        this.descricao = descricao;
+        this.categoria = categoria;
+        this.disponivel = disponivel;
+        this.preco = preco !== undefined ? Number(preco) : undefined;
+        this.foto = foto;
+        this.proprietarioId = proprietarioId ? Number(proprietarioId) : undefined;
     }
-    if (filtros.categoria) {
-        where.categoria = filtros.categoria;
+
+    async criar() {
+        await this.validacao();
+        return prisma.imovel.create({
+            data: {
+                nome: this.nome,
+                descricao: this.descricao,
+                categoria: this.categoria,
+                disponivel: this.disponivel,
+                preco: this.preco,
+                foto: this.foto,
+                proprietarioId: this.proprietarioId,
+            },
+            include: { proprietario: true },
+        });
     }
-    if (filtros.disponivel !== undefined) {
-        where.disponivel = filtros.disponivel === 'true';
+
+    async atualizar() {
+        await this.validacao(true);
+        return prisma.imovel.update({
+            where: { id: this.id },
+            data: {
+                nome: this.nome,
+                descricao: this.descricao,
+                categoria: this.categoria,
+                disponivel: this.disponivel,
+                preco: this.preco,
+                foto: this.foto,
+                proprietarioId: this.proprietarioId,
+            },
+            include: { proprietario: true },
+        });
     }
 
-    return prisma.imovel.findMany({
-        where,
-        include: { proprietario: true },
-    });
-}
+    async deletar() {
+        return prisma.imovel.delete({ where: { id: this.id } });
+    }
 
-export async function buscarPorId(id) {
-    return prisma.imovel.findUnique({
-        where: { id: Number(id) },
-        include: { proprietario: true },
-    });
-}
+    static async buscarTodos(filtros = {}) {
+        const where = {};
 
-export async function criar(dados) {
-    return prisma.imovel.create({
-        data: {
-            nome: dados.nome,
-            descricao: dados.descricao ?? null,
-            categoria: dados.categoria,
-            disponivel: dados.disponivel,
-            preco: Number(dados.preco),
-            foto: data.foto ?? null,
-            proprietarioId: Number(dados.proprietarioId),
-        },
-        include: { proprietario: true },
-    });
-}
+        if (filtros.nome) {
+            where.nome = { contains: filtros.nome, mode: 'insensitive' };
+        }
 
-export async function atualizar(id, data) {
-    return prisma.imovel.update({
-        where: { id: Number(id) },
-        data: {
-            nome: data.nome,
-            descricao: data.descricao,
-            categoria: data.categoria,
-            disponivel: data.disponivel,
-            preco: data.preco !== undefined ? Number(data.preco) : undefined,
-            foto: data.foto,
-            proprietarioId: data.proprietarioId ? Number(data.proprietarioId) : undefined,
-        },
-        include: { proprietario: true },
-    });
-}
+        if (filtros.categoria) {
+            where.categoria = filtros.categoria;
+        }
 
-export async function excluir(id) {
-    return prisma.imovel.delete({
-        where: { id: Number(id) },
-    });
-}
+        if (filtros.disponivel !== undefined) {
+            where.disponivel = filtros.disponivel === 'true' || filtros.disponivel === true;
+        }
 
-export default ImoveisModel
+        if (filtros.proprietarioId) {
+            where.proprietarioId = Number(filtros.proprietarioId);
+        }
+
+        return prisma.imovel.findMany({
+            where,
+            include: { proprietario: true },
+        });
+    }
+
+    static async buscarPorId(id) {
+        const data = await prisma.imovel.findUnique({
+            where: { id: Number(id) },
+            include: { proprietario: true },
+        });
+
+        if (!data) return null;
+
+        return new ImoveisModel(data);
+    }
+}
