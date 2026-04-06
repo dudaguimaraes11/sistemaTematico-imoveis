@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import imoveisRoutes from './routes/imoveisRoute.js';
 import clientesRoutes from './routes/clienteRoutes.js';
+import apiKey from './utils/apiKey.js';
 
 const app = express();
 app.use(express.json());
@@ -22,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 // Rotas
-app.use('/api', imoveisRoutes);
+app.use('/api', apiKey, imoveisRoutes);
 app.use('/api', clientesRoutes);
 
 // Tratamento de Erros do Multer
