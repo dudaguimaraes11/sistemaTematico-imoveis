@@ -1,9 +1,9 @@
 import express from 'express';
 import 'dotenv/config';
-import path from 'path'; 
-import { fileURLToPath } from 'url'; 
+import path from 'path';
+import { fileURLToPath } from 'url';
 import imoveisRoutes from './routes/imoveisRoute.js';
-import clientesRoutes from './routes/clientesRoute.js';
+import clientesRoutes from './routes/clienteRoutes.js';
 
 const app = express();
 app.use(express.json());
