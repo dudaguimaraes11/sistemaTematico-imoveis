@@ -1,6 +1,6 @@
 import express from 'express';
-import * as controller from '../controllers/pdfController.js';
-import autenticarApiKey from '../utils/apiKey.js'
+import * as controller from '../controllers/clienteController.js';
+import autenticarApiKey from '../utils/apiKey.js';
 
 const router = express.Router();
 
