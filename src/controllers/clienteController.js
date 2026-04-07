@@ -1,5 +1,69 @@
 import ClienteModel from '../models/ClienteModel.js';
+import prisma from '../utils/prismaClient.js';
 import buscarEnderecoPorCep from '../utils/viaCep.js';
+
+const validarDadosCliente = async ({
+    id = null,
+    nome,
+    email,
+    cpf,
+    telefone,
+    cep,
+    ativo,
+    isUpdate = false,
+}) => {
+    if (!nome || nome.length < 3 || nome.length > 100) {
+        throw new Error('O nome deve ter entre 3 e 100 caracteres.');
+    }
+
+    if (!cpf || !/^\d{11}$/.test(String(cpf))) {
+        throw new Error('CPF deve conter exatamente 11 dígitos numéricos.');
+    }
+
+    if (!isUpdate && !telefone) {
+        throw new Error('O campo "telefone" é obrigatório!');
+    }
+
+    if (!isUpdate && !cep) {
+        throw new Error('O campo "cep" é obrigatório!');
+    }
+
+    if (cep && !/^\d{8}$/.test(String(cep))) {
+        throw new Error('CEP deve conter exatamente 8 dígitos numéricos.');
+    }
+
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+        throw new Error('Email deve ser válido.');
+    }
+
+    if (ativo !== undefined && typeof ativo !== 'boolean') {
+        throw new Error('O campo "ativo" deve ser booleano.');
+    }
+
+    const cpfExistente = await prisma.cliente.findFirst({
+        where: {
+            cpf: String(cpf),
+            ...(isUpdate && id ? { id: { not: id } } : {}),
+        },
+    });
+
+    if (cpfExistente) {
+        throw new Error('CPF já cadastrado.');
+    }
+
+    if (email) {
+        const emailExistente = await prisma.cliente.findFirst({
+            where: {
+                email,
+                ...(isUpdate && id ? { id: { not: id } } : {}),
+            },
+        });
+
+        if (emailExistente) {
+            throw new Error('Este email já foi cadastrado.');
+        }
+    }
+};
 
  
 export const criar = async (req, res) => {
@@ -31,24 +95,12 @@ export const criar = async (req, res) => {
             return res.status(400).json({ error: 'O campo "cep" é obrigatório!' });
         }
 
-        if (ativo !== undefined && typeof ativo !== 'boolean') {
-            return res.status(400).json({ error: 'O campo "ativo" deve ser booleano.' });
-        }
-        let endereco = {};
+        await validarDadosCliente({ nome, email, telefone, cpf, cep, ativo });
 
-        if (cep) {
+        const endereco = await buscarEnderecoPorCep(cep);
 
-            if (!/^\d{8}$/.test(cep)) {
-                return res
-                    .status(400)
-                    .json({ error: 'CEP deve conter 8 dígitos numéricos.' });
-            }
-
-            endereco = await buscarEnderecoPorCep(cep);
-
-            if (!endereco) {
-                return res.status(400).json({ error: 'CEP inválido ou não encontrado.' });
-            }
+        if (!endereco) {
+            return res.status(400).json({ error: 'CEP inválido ou não encontrado.' });
         }
 
 
@@ -135,11 +187,21 @@ export const atualizar = async (req, res) => {
 
         const { nome, email, telefone, cpf, cep, ativo } = req.body;
 
+        await validarDadosCliente({
+            id,
+            nome: nome || clienteExistente.nome,
+            email: email || clienteExistente.email,
+            cpf: cpf ? String(cpf) : clienteExistente.cpf,
+            telefone: telefone || clienteExistente.telefone,
+            cep: cep || clienteExistente.cep,
+            ativo: ativo !== undefined ? ativo : clienteExistente.ativo,
+            isUpdate: true,
+        });
+
+        let endereco = null;
+
         if (cep) {
-            if (!/^\d{8}$/.test(cep)) {
-                return res.status(400).json({ error: 'CEP deve conter 8 dígitos numéricos.' });
-            }
-            const endereco = await buscarEnderecoPorCep(cep);
+            endereco = await buscarEnderecoPorCep(cep);
 
             if (!endereco) {
                 return res.status(400).json({ error: 'CEP inválido ou não encontrado.' });

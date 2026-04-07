@@ -26,50 +26,7 @@ export default class ClienteModel {
         this.uf = uf;
         this.ativo = ativo;
     }
-
-    async validacao(isUpdate = false) {
-        if (!this.nome || this.nome.length < 3 || this.nome.length > 100) {
-            throw new Error('O nome deve ter entre 3 e 100 caracteres.');
-        }
-
-        if (!this.cpf || !/^\d{11}$/.test(this.cpf)) {
-            throw new Error('CPF deve conter exatamente 11 dígitos numéricos.');
-        }
-
-        const cpfExistente = await prisma.cliente.findFirst({
-            where: {
-                cpf: this.cpf,
-                ...(isUpdate && { id: { not: this.id } }),
-            },
-        });
-
-        if (cpfExistente) {
-            throw new Error('CPF já cadastrado.');
-        }
-
-        if (this.cep && !/^\d{8}$/.test(this.cep)) {
-            throw new Error('CEP deve conter exatamente 8 dígitos numéricos.');
-        }
-
-        if (this.email && !/^\S+@\S+\.\S+$/.test(this.email)) {
-            throw new Error('Email deve ser válido.');
-        }
-
-        if (this.email) {
-            const emailExistente = await prisma.cliente.findFirst({
-                where: {
-                    email: this.email,
-                    ...(isUpdate && { id: { not: this.id } }),
-                },
-            });
-
-            if (emailExistente) {
-                throw new Error('Este email já foi cadastrado.');
-            }
-        }
-    }
     async criar() {
-        await this.validacao();
         return prisma.cliente.create({
             data: {
                 nome: this.nome,
@@ -87,7 +44,6 @@ export default class ClienteModel {
     }
 
     async atualizar() {
-        await this.validacao(true);
         return prisma.cliente.update({
             where: { id: this.id },
             data: {
