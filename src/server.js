@@ -1,8 +1,8 @@
 import express from 'express';
 import 'dotenv/config';
-import imoveisRoutes from './routes/imoveisRoute.js';
+import imoveisRoutes from './routes/imoveisRoutes.js';
 import clientesRoutes from './routes/clienteRoutes.js';
-
+import fotoRoutes from './routes/fotoRoutes.js'
 import pdfRoutes from './routes/pdfRoutes.js';
 
 import e from 'express';
@@ -21,6 +21,7 @@ app.use('/api', imoveisRoutes);
 app.use('/api', clientesRoutes);
 app.use('/', express.static('uploads'));
 app.use('/api', pdfRoutes);
+app.use('/api', fotoRoutes)
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });

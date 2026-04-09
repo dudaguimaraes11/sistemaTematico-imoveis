@@ -31,12 +31,17 @@ export const uploadFoto = async (req, res) => {
         });
 
         return res.status(200).json(imovelAtualizado);
-    } catch (error) {
-        return res.status(500).json({ error: 'Erro interno ao processar a imagem.' });
-    }
+   } catch (error) {
+    console.error(error); // Isso vai imprimir o erro detalhado no terminal do VS Code
+    return res.status(500).json({ 
+        error: 'Erro interno ao processar a imagem.',
+        message: error.message, // O Sharp vai dizer aqui se o erro é 'Input buffer contains unsupported image format'
+        stack: error.stack 
+    });
+}
 };
 
-export const getFoto = async (req, res) => {
+export const verFoto = async (req, res) => {
     try {
         const { id } = req.params;
         const imovel = await prisma.imovel.findUnique({ where: { id: Number(id) } });
@@ -45,7 +50,7 @@ export const getFoto = async (req, res) => {
             return res.status(404).json({ error: 'Foto não encontrada.' });
         }
 
-        return res.status(200).json({ url: `http://localhost:3001/${imovel.foto}` });
+        return res.status(200).json({ url: `http://localhost:3000/${imovel.foto}` });
     } catch (error) {
         return res.status(500).json({ error: 'Erro ao buscar a foto.' });
     }
