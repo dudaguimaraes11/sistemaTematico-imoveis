@@ -15,7 +15,7 @@ export const imovelPorId = async (req, res) => {
             return res.status(404).json({ error: 'Registro do imóvel não encontrado.' });
         }
 
-        const pdf = await gerarPdfImoveis(imovel);
+        const pdf = await gerarPdfImovel(imovel);
         return res
             .set({
                 'Content-Type': 'application/pdf',
@@ -37,7 +37,7 @@ export const imoveisTodos = async (req, res) => {
             return res.status(200).json({ message: 'Nenhum registro de imóvel encontrado.' });
         }
 
-        const pdf = await gerarPdfTodos(registros);
+        const pdf = await gerarPdfTodos(imoveis);
 
         return res
             .set({
