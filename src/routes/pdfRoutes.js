@@ -1,5 +1,4 @@
 import express from 'express';
-import upload from '../utils/uploadConfig.js';
 import * as controller from '../controllers/pdfController.js';
 
 const router = express.Router();
