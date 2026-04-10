@@ -8,3 +8,6 @@ router.get('/pdf', controller.gerarPdfTodos);
 router.get('/:id/pdf', controller.gerarPdfImovel);
 
 export default router;
+
+/* Arruma erros */ 
+
