@@ -1,20 +1,9 @@
 import express from 'express';
-import * as controller from '../controllers/FotoController.js'; 
-import { upload } from '../utils/fotoHelper.js';
+import * as controller from '../controllers/PdfController.js'; // Ajuste o nome do arquivo se necessário
 
 const router = express.Router();
 
-/**
- * ROTA DE UPLOAD
- * O 'upload.single('foto')' extrai o arquivo enviado pelo Postman/Frontend
- * e o coloca dentro de 'req.file' para o controller usar.
- */
-router.post('/:id/foto', upload.single('foto'), controller.uploadFoto);
-
-/**
- * ROTA DE VISUALIZAÇÃO
- * Retorna o link ou os dados da foto do imóvel
- */
-router.get('/:id/foto', controller.verFoto);
+router.get('/pdf', controller.imoveisTodos);
+router.get('/:id', controller.imovelPorId);
 
 export default router;
